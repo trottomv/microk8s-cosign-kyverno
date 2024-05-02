@@ -1,5 +1,5 @@
 locals {
-  kyverno_namespace = "kyverno"
+  namespace = "kyverno"
 }
 
 terraform {
@@ -12,18 +12,20 @@ terraform {
 }
 
 resource "helm_release" "kyverno" {
-  name             = "kyverno"
-  namespace        = local.kyverno_namespace
-  repository       = "https://kyverno.github.io/kyverno/"
-  chart            = "kyverno"
+  name       = "kyverno"
+  namespace  = local.namespace
+  repository = "https://kyverno.github.io/kyverno/"
+  chart      = "kyverno"
+
   create_namespace = true
 }
 
 resource "helm_release" "kyverno-policies" {
   name       = "kyverno-policies"
-  namespace  = local.kyverno_namespace
+  namespace  = local.namespace
   repository = "https://kyverno.github.io/kyverno/"
   chart      = "kyverno-policies"
+
   depends_on = [helm_release.kyverno]
 }
 
@@ -31,7 +33,7 @@ resource "helm_release" "kyverno-policies" {
 resource "kubernetes_secret_v1" "kyverno-regcred" {
   metadata {
     name      = "kyverno-regcred"
-    namespace = local.kyverno_namespace
+    namespace = local.namespace
   }
   data = {
     ".dockerconfigjson" = jsonencode({
