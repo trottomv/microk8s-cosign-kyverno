@@ -26,3 +26,21 @@ resource "helm_release" "kyverno-policies" {
   chart      = "kyverno-policies"
   depends_on = [helm_release.kyverno]
 }
+
+
+resource "kubernetes_secret_v1" "kyverno-regcred" {
+  metadata {
+    name      = "kyverno-regcred"
+    namespace = local.kyverno_namespace
+  }
+  data = {
+    ".dockerconfigjson" = jsonencode({
+      auths = {
+        "${var.registry_server}" = {
+          auth = "${base64encode("${var.registry_username}:${var.registry_password}")}"
+        }
+      }
+    })
+  }
+  type = "kubernetes.io/dockerconfigjson"
+}

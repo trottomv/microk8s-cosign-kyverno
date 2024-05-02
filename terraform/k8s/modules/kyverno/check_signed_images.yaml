@@ -1,0 +1,33 @@
+apiVersion: kyverno.io/v2beta1
+kind: ClusterPolicy
+metadata:
+  name: check-signed-images
+spec:
+  validationFailureAction: Enforce
+  webhookTimeoutSeconds: 30
+  failurePolicy: Fail
+  rules:
+    - name: check-signed-images
+      match:
+        any:
+        - resources:
+            kinds:
+            - Pod
+            namespaces:
+            - develop
+            - production
+      verifyImages:
+      - imageRegistryCredentials:
+          secrets:
+          - kyverno-regcred
+        imageReferences:
+        - "registry.gitlab.com/*"
+        attestors:
+        - count: 1
+          entries:
+          - keys:
+              publicKeys: |-
+                -----BEGIN PUBLIC KEY-----
+                MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE0r7O5qURTPkXP6a3WdpcFi4q2JwH
+                8jsoYZ7eEg7Ai8SvIzLWZ0jHsngjcLt3wB/MHQ1M6AFhVIG9r3S6cFa5FQ==
+                -----END PUBLIC KEY-----

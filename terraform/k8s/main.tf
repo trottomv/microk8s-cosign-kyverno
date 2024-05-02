@@ -62,6 +62,10 @@ resource "kubernetes_secret_v1" "regcred" {
 
 module "kyverno" {
   source = "./modules/kyverno"
+
+  registry_password = var.registry_password
+  registry_server   = var.registry_server
+  registry_username = var.registry_username
 }
 
 module "deployment" {
