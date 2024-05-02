@@ -1,6 +1,5 @@
 locals {
   dev_namespace = "develop"
-
 }
 
 terraform {
@@ -24,7 +23,6 @@ provider "kubernetes" {
   cluster_ca_certificate = base64decode(var.kubernetes_cluster_ca_certificate)
 }
 
-
 provider "helm" {
   kubernetes {
     host = var.kubernetes_host
@@ -41,18 +39,6 @@ resource "kubernetes_namespace_v1" "dev" {
   }
 }
 
-resource "helm_release" "kyverno" {
-  name             = "kyverno"
-  namespace        = "kyverno"
-  repository       = "https://kyverno.github.io/kyverno/"
-  chart            = "kyverno"
-  create_namespace = true
-}
-
-resource "helm_release" "kyverno-policies" {
-  name       = "kyverno-policies"
-  namespace  = "kyverno"
-  repository = "https://kyverno.github.io/kyverno/"
-  chart      = "kyverno-policies"
-  depends_on = [helm_release.kyverno]
+module "kyverno" {
+  source = "./modules/kyverno"
 }
