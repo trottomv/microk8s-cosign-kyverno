@@ -1,5 +1,5 @@
 locals {
-  kyverno_namespace = "develop"
+  kyverno_namespace = "kyverno"
 }
 
 terraform {
