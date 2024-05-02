@@ -1,7 +1,3 @@
-locals {
-  dev_namespace = "develop"
-}
-
 terraform {
   required_providers {
     kubernetes = {
@@ -33,12 +29,51 @@ provider "helm" {
   }
 }
 
-resource "kubernetes_namespace_v1" "dev" {
+resource "helm_release" "reloader" {
+  name       = "reloader"
+  chart      = "reloader"
+  repository = "https://stakater.github.io/stakater-charts"
+}
+
+resource "kubernetes_namespace_v1" "deployment" {
   metadata {
-    name = local.dev_namespace
+    name = var.deployment_namespace
   }
+}
+
+resource "kubernetes_secret_v1" "regcred" {
+  metadata {
+    name      = "regcred"
+    namespace = var.deployment_namespace
+  }
+  data = {
+    ".dockerconfigjson" = jsonencode({
+      auths = {
+        "${var.registry_server}" = {
+          auth = "${base64encode("${var.registry_username}:${var.registry_password}")}"
+        }
+      }
+    })
+  }
+  type = "kubernetes.io/dockerconfigjson"
+
+  depends_on = [kubernetes_namespace_v1.deployment]
 }
 
 module "kyverno" {
   source = "./modules/kyverno"
+}
+
+module "deployment" {
+  source = "./modules/deployment"
+
+  deployment_namespace    = var.deployment_namespace
+  environment_slug        = var.environment_slug
+  project_slug            = var.project_slug
+  service_container_image = var.service_container_image
+  service_container_port  = var.service_container_port
+  service_replicas        = var.service_replicas
+  service_slug            = var.service_slug
+
+  depends_on = [kubernetes_secret_v1.regcred]
 }
