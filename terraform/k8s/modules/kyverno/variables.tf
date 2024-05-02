@@ -11,3 +11,9 @@ variable "registry_server" {
 variable "registry_username" {
   type = string
 }
+
+# Cosign
+
+variable "cosign_public_key" {
+  type = string
+}

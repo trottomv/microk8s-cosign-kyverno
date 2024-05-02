@@ -68,3 +68,9 @@ variable "service_slug" {
   type    = string
   default = "app"
 }
+
+# Cosign public key
+
+variable "cosign_public_key" {
+  type = string
+}

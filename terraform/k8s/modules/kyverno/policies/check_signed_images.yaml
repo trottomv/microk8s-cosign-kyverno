@@ -28,6 +28,5 @@ spec:
           - keys:
               publicKeys: |-
                 -----BEGIN PUBLIC KEY-----
-                MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE0r7O5qURTPkXP6a3WdpcFi4q2JwH
-                8jsoYZ7eEg7Ai8SvIzLWZ0jHsngjcLt3wB/MHQ1M6AFhVIG9r3S6cFa5FQ==
+                __COSIGN_PUBLIC_KEY__
                 -----END PUBLIC KEY-----
