@@ -49,3 +49,7 @@
     - name: Enable MetalLB addon
       ansible.builtin.command: microk8s.enable metallb:{{ ansible_host }}-{{ ansible_host }}
       changed_when: false
+
+    - name: Enable metrics-server addon
+      ansible.builtin.command: microk8s.enable metrics-server
+      changed_when: false
