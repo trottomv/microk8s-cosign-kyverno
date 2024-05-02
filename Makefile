@@ -1,5 +1,12 @@
 .DEFAULT_GOAL := help
 
+.PHONY: deploy
+deploy:  ## Deploy k8s
+	terraform -chdir=./terraform/k8s/ init
+	terraform -chdir=./terraform/k8s/ validate
+	terraform -chdir=./terraform/k8s/ plan
+	terraform -chdir=./terraform/k8s/ apply -auto-approve
+
 .PHONY: precommit
 precommit:  ## Fix code formatting, linting and sorting imports
 	pre-commit run --all-files
