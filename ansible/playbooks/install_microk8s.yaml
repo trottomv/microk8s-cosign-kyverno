@@ -1,0 +1,51 @@
+---
+- name: Install MicroK8s and apply customizations
+  hosts: microk8s
+  become: true
+
+  vars:
+    app_user: appuser
+
+  tasks:
+    - name: Update the system
+      ansible.builtin.apt:
+        update_cache: true
+        upgrade: true
+      register: apt_update_result
+      changed_when: apt_update_result.changed
+
+    - name: Add non-root user
+      ansible.builtin.user:
+        name: "{{ app_user }}"
+        state: present
+        shell: /bin/bash
+        create_home: true
+
+    - name: Install MicroK8s
+      ansible.builtin.command: snap install microk8s --classic --channel=1.29/stable
+      changed_when: false
+
+    - name: Add user to microk8s group
+      ansible.builtin.user:
+        name: "{{ app_user }}"
+        groups: microk8s
+        append: true
+
+    - name: Create Kubernetes config directory
+      ansible.builtin.file:
+        path: "/home/{{ app_user }}/.kube"
+        state: directory
+        mode: "0700"
+        owner: "{{ app_user }}"
+
+    - name: Check MicroK8s status
+      ansible.builtin.command: microk8s status --wait-ready
+      changed_when: false
+
+    - name: Enable DNS addon
+      ansible.builtin.command: microk8s.enable dns
+      changed_when: false
+
+    - name: Enable MetalLB addon
+      ansible.builtin.command: microk8s.enable metallb:{{ ansible_host }}-{{ ansible_host }}
+      changed_when: false
