@@ -12,9 +12,9 @@ provider "hcloud" {
 }
 
 resource "hcloud_server" "main" {
-  name        = "microk8s"
-  image       = "ubuntu-24.04"
-  server_type = "cx21"
+  name        = var.server_name
+  image       = var.server_image
+  server_type = var.server_type
   public_net {
     ipv4_enabled = true
     ipv6_enabled = true
