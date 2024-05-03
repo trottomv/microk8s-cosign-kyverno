@@ -48,6 +48,10 @@ resource "kubernetes_deployment_v1" "app" {
     }
   }
 
+  lifecycle {
+    ignore_changes = [metadata[0].annotations]
+  }
+
   timeouts {
     create = "1m"
     update = "1m"
