@@ -19,7 +19,6 @@ resource "helm_release" "kyverno" {
   create_namespace = true
 
   values = [file("${path.module}/values.yaml")]
-
 }
 
 resource "helm_release" "kyverno-policies" {
