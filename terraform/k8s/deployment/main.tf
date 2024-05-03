@@ -5,6 +5,8 @@ locals {
     project     = var.project_slug
     terraform   = "true"
   }
+
+  service_port = 8000
 }
 
 terraform {
@@ -108,5 +110,55 @@ resource "kubernetes_deployment_v1" "app" {
   timeouts {
     create = "1m"
     update = "1m"
+  }
+}
+
+resource "kubernetes_ingress_v1" "app" {
+  metadata {
+    name      = var.service_slug
+    namespace = var.deployment_namespace
+  }
+
+  spec {
+    rule {
+      http {
+        path {
+          path      = "/"
+          path_type = "Prefix"
+          backend {
+            service {
+              name = var.service_slug
+              port {
+                number = local.service_port
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+resource "kubernetes_service" "app" {
+  metadata {
+    name      = var.service_slug
+    namespace = var.deployment_namespace
+  }
+
+  spec {
+    internal_traffic_policy = "Cluster"
+    ip_families             = ["IPv4"]
+    ip_family_policy        = "SingleStack"
+
+    port {
+      port        = local.service_port
+      protocol    = "TCP"
+      target_port = local.service_port
+    }
+
+    selector = local.service_labels
+
+    session_affinity = "None"
+    type             = "ClusterIP"
   }
 }
