@@ -52,7 +52,7 @@ setup_kyverno:  ## Setting up Kyverno on K8s cluster
 	terraform -chdir=./terraform/k8s/kyverno-policies/ apply -auto-approve -var-file=../vars/k8s.tfvars -var-file=../vars/cosign.tfvars
 
 .PHONY: setup_kubernetes
-setup_kubernetes:  ## Install MicroK8s on server
+setup_kubernetes:  ## Setting up MicroK8s cluster on server
 	ansible-playbook -i ./ansible/inventories/hosts ./ansible/playbooks/install_microk8s.yaml
 
 help:
