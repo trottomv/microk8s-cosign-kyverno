@@ -1,2 +1,0 @@
-reportsController:
-  enabled: false # Disable kyverno reports controller to prevent excessive CPU usage

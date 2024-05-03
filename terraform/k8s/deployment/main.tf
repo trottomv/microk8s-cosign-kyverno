@@ -1,8 +1,17 @@
+locals {
+  service_labels = {
+    component   = var.service_slug
+    environment = var.environment_slug
+    project     = var.project_slug
+    terraform   = "true"
+  }
+}
+
 terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "~> 2.29"
+      version = "~> 2.13"
     }
     helm = {
       source  = "hashicorp/helm"
@@ -60,26 +69,44 @@ resource "kubernetes_secret_v1" "regcred" {
   depends_on = [kubernetes_namespace_v1.deployment]
 }
 
-module "kyverno" {
-  source = "./modules/kyverno"
+resource "kubernetes_deployment_v1" "app" {
+  metadata {
+    name      = var.service_slug
+    namespace = var.deployment_namespace
+    annotations = {
+      "reloader.stakater.com/auto" = "true"
+    }
+  }
+  spec {
+    replicas = var.service_replicas
+    selector {
+      match_labels = local.service_labels
+    }
+    template {
+      metadata {
+        labels = local.service_labels
+      }
+      spec {
+        image_pull_secrets {
+          name = "regcred"
+        }
+        container {
+          image = var.service_container_image
+          name  = var.service_slug
+          port {
+            container_port = var.service_container_port
+          }
+        }
+      }
+    }
+  }
 
-  cosign_public_key = var.cosign_public_key
+  lifecycle {
+    ignore_changes = [metadata[0].annotations]
+  }
 
-  registry_password = var.registry_password
-  registry_server   = var.registry_server
-  registry_username = var.registry_username
-}
-
-module "deployment" {
-  source = "./modules/deployment"
-
-  deployment_namespace    = var.deployment_namespace
-  environment_slug        = var.environment_slug
-  project_slug            = var.project_slug
-  service_container_image = var.service_container_image
-  service_container_port  = var.service_container_port
-  service_replicas        = var.service_replicas
-  service_slug            = var.service_slug
-
-  depends_on = [kubernetes_secret_v1.regcred]
+  timeouts {
+    create = "1m"
+    update = "1m"
+  }
 }

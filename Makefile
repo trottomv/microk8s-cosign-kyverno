@@ -4,23 +4,29 @@
 check:  ## Check terraform files and configurations
 	terraform -chdir=./terraform/hetzner/ init
 	terraform -chdir=./terraform/hetzner/ validate
-	terraform -chdir=./terraform/k8s/ init
-	terraform -chdir=./terraform/k8s/ validate
+	terraform -chdir=./terraform/k8s/kyverno/ init
+	terraform -chdir=./terraform/k8s/kyverno/ validate
+	terraform -chdir=./terraform/k8s/kyverno-policies/ init
+	terraform -chdir=./terraform/k8s/kyverno-policies/ validate
+	terraform -chdir=./terraform/k8s/deployment/ init
+	terraform -chdir=./terraform/k8s/deployment/ validate
 
 .PHONY: deploy
 deploy:  ## Deploy k8s
-	terraform -chdir=./terraform/k8s/ init
-	terraform -chdir=./terraform/k8s/ validate
-	terraform -chdir=./terraform/k8s/ plan
-	terraform -chdir=./terraform/k8s/ apply -auto-approve
+	terraform -chdir=./terraform/k8s/deployment/ init
+	terraform -chdir=./terraform/k8s/deployment/ validate
+	terraform -chdir=./terraform/k8s/deployment/ plan -var-file=../vars/k8s.tfvars -var-file=../vars/deployment.tfvars -var-file=../vars/regcred.tfvars
+	terraform -chdir=./terraform/k8s/deployment/ apply -auto-approve -var-file=../vars/k8s.tfvars -var-file=../vars/deployment.tfvars -var-file=../vars/regcred.tfvars
 
 .PHONY: fix
-fix: check ## Fix terraform files and configurations
+fix: check  ## Fix terraform files and configurations
 	terraform -chdir=./terraform/hetzner/ fmt
-	terraform -chdir=./terraform/k8s/ fmt
+	terraform -chdir=./terraform/k8s/kyverno/ fmt
+	terraform -chdir=./terraform/k8s/kyverno-policies/ fmt
+	terraform -chdir=./terraform/k8s/deploymnet/ fmt
 
 .PHONY: hcloud
-hcloud: ## Provisioning on Hetzner Cloud
+hcloud:  ## Provisioning the Hetzner Cloud server
 	terraform -chdir=./terraform/hetzner/ init
 	terraform -chdir=./terraform/hetzner/ validate
 	terraform -chdir=./terraform/hetzner/ plan
@@ -34,9 +40,20 @@ precommit:  ## Fix code formatting, linting and sorting imports
 precommit_update:  ## Update pre_commit
 	pre-commit autoupdate
 
-.PHONY: setup_microk8s
-setup_microk8s: ## Provisioning Setting up of MicroK8s on Hetzner Cloud
-	ansible_playbook -i ./ansible/inventories/hosts ./ansible/setup_microk8s.yml
+.PHONY: setup_kyverno
+setup_kyverno:  ## Setting up Kyverno on K8s cluster
+	terraform -chdir=./terraform/k8s/kyverno/ init
+	terraform -chdir=./terraform/k8s/kyverno/ validate
+	terraform -chdir=./terraform/k8s/kyverno/ plan -var-file=../vars/k8s.tfvars -var-file=../vars/regcred.tfvars
+	terraform -chdir=./terraform/k8s/kyverno/ apply -auto-approve -var-file=../vars/k8s.tfvars -var-file=../vars/regcred.tfvars
+	terraform -chdir=./terraform/k8s/kyverno-policies/ init
+	terraform -chdir=./terraform/k8s/kyverno-policies/ validate
+	terraform -chdir=./terraform/k8s/kyverno-policies/ plan -var-file=../vars/k8s.tfvars -var-file=../vars/cosign.tfvars
+	terraform -chdir=./terraform/k8s/kyverno-policies/ apply -auto-approve -var-file=../vars/k8s.tfvars -var-file=../vars/cosign.tfvars
+
+.PHONY: install_kubernetes
+install_kubernetes:  ## Install MicroK8s on server
+	ansible-playbook -i ./ansible/inventories/hosts ./ansible/playbooks/install_microk8s.yaml
 
 help:
 	@echo "[Help] Makefile list commands:"

@@ -1,0 +1,4 @@
+kubernetes_client_certificate     = ""
+kubernetes_client_key             = ""
+kubernetes_cluster_ca_certificate = ""
+kubernetes_host                   = "https://12.34.56.78:16443"

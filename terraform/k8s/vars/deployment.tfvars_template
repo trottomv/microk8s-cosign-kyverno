@@ -1,0 +1,2 @@
+service_container_image = "registry.gitlab.com/<group>/<project>/<image>:<tag>"
+service_replicas        = 1
