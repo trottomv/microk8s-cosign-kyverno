@@ -7,6 +7,10 @@ deploy:  ## Deploy k8s
 	terraform -chdir=./terraform/k8s/ plan
 	terraform -chdir=./terraform/k8s/ apply -auto-approve
 
+.PHONY: fix
+fix:  ## Deploy k8s
+	terraform -chdir=./terraform/k8s/ fmt
+
 .PHONY: precommit
 precommit:  ## Fix code formatting, linting and sorting imports
 	pre-commit run --all-files
