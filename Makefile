@@ -44,12 +44,12 @@ precommit_update:  ## Update pre_commit
 setup_kyverno:  ## Setting up Kyverno on K8s cluster
 	terraform -chdir=./terraform/k8s/kyverno/ init
 	terraform -chdir=./terraform/k8s/kyverno/ validate
-	terraform -chdir=./terraform/k8s/kyverno/ plan -var-file=../vars/k8s.tfvars -var-file=../vars/regcred.tfvars
-	terraform -chdir=./terraform/k8s/kyverno/ apply -auto-approve -var-file=../vars/k8s.tfvars -var-file=../vars/regcred.tfvars
+	terraform -chdir=./terraform/k8s/kyverno/ plan -var-file=../vars/k8s.tfvars
+	terraform -chdir=./terraform/k8s/kyverno/ apply -auto-approve -var-file=../vars/k8s.tfvars
 	terraform -chdir=./terraform/k8s/kyverno-policies/ init
 	terraform -chdir=./terraform/k8s/kyverno-policies/ validate
-	terraform -chdir=./terraform/k8s/kyverno-policies/ plan -var-file=../vars/k8s.tfvars -var-file=../vars/cosign.tfvars
-	terraform -chdir=./terraform/k8s/kyverno-policies/ apply -auto-approve -var-file=../vars/k8s.tfvars -var-file=../vars/cosign.tfvars
+	terraform -chdir=./terraform/k8s/kyverno-policies/ plan -var-file=../vars/k8s.tfvars -var-file=../vars/regcred.tfvars -var-file=../vars/cosign.tfvars
+	terraform -chdir=./terraform/k8s/kyverno-policies/ apply -auto-approve -var-file=../vars/k8s.tfvars -var-file=../vars/regcred.tfvars -var-file=../vars/cosign.tfvars
 
 .PHONY: setup_kubernetes
 setup_kubernetes:  ## Setting up MicroK8s cluster on server

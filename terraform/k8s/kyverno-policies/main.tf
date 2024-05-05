@@ -6,7 +6,7 @@ terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "~> 2.13"
+      version = "~> 2.29"
     }
     helm = {
       source  = "hashicorp/helm"
@@ -40,8 +40,25 @@ resource "helm_release" "kyverno-policies" {
   chart      = "kyverno-policies"
 }
 
+resource "kubernetes_secret_v1" "kyverno-regcred" {
+  metadata {
+    name      = "kyverno-regcred"
+    namespace = local.namespace
+  }
+  data = {
+    ".dockerconfigjson" = jsonencode({
+      auths = {
+        "${var.registry_server}" = {
+          auth = "${base64encode("${var.registry_username}:${var.registry_password}")}"
+        }
+      }
+    })
+  }
+  type = "kubernetes.io/dockerconfigjson"
+}
+
 resource "kubernetes_manifest" "check_signed_images_policy" {
   manifest = yamldecode(replace(file("${path.module}/policies/check_signed_images.yaml"), "__COSIGN_PUBLIC_KEY__", var.cosign_public_key))
 
-  depends_on = [helm_release.kyverno-policies]
+  depends_on = [kubernetes_secret_v1.kyverno-regcred]
 }

@@ -6,7 +6,7 @@ terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "~> 2.13"
+      version = "~> 2.29"
     }
     helm = {
       source  = "hashicorp/helm"
@@ -41,23 +41,4 @@ resource "helm_release" "kyverno" {
   create_namespace = true
 
   values = [file("${path.module}/values.yaml")]
-}
-
-resource "kubernetes_secret_v1" "kyverno-regcred" {
-  metadata {
-    name      = "kyverno-regcred"
-    namespace = local.namespace
-  }
-  data = {
-    ".dockerconfigjson" = jsonencode({
-      auths = {
-        "${var.registry_server}" = {
-          auth = "${base64encode("${var.registry_username}:${var.registry_password}")}"
-        }
-      }
-    })
-  }
-  type = "kubernetes.io/dockerconfigjson"
-
-  depends_on = [helm_release.kyverno]
 }
