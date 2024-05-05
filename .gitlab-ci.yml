@@ -1,0 +1,50 @@
+stages:
+  - build
+
+.tags_only:
+  variables:
+    VERSION_REF: ${CI_COMMIT_TAG}
+  only:
+    - tags
+
+.build:
+  stage: build
+  image: docker:20
+  services:
+    - docker:20-dind
+  before_script:
+    - export DOCKER_CONFIG=${PWD}/.dockerconfig
+    - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" ${CI_REGISTRY}
+  script:
+    - docker build -t ${CI_REGISTRY}/${CI_PROJECT_PATH}/app:${VERSION_REF} --pull app/
+    - docker push ${CI_REGISTRY}/${CI_PROJECT_PATH}/app:${VERSION_REF}
+  after_script:
+    - docker logout ${CI_REGISTRY}
+
+.sign:
+  stage: build
+  image: alpine:3.19
+  variables:
+    COSIGN_YES: "true"
+    COSIGN_PASSWORD: ${COSIGN_PASSWORD}
+  before_script:
+    - apk add --update cosign docker jq
+    - cosign version
+    - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" ${CI_REGISTRY}
+  script:
+    - export IMAGE_DIGEST=$(docker manifest inspect --verbose ${CI_REGISTRY}/${CI_PROJECT_PATH}/app:${VERSION_REF} | jq -r '.Descriptor.digest')
+    - cosign sign --key ${COSIGN_PRIVATE_KEY} ${CI_REGISTRY}/${CI_PROJECT_PATH}/app@$IMAGE_DIGEST
+  after_script:
+    - docker logout ${CI_REGISTRY}
+
+build:
+  extends:
+    - .tags_only
+    - .build
+
+sign:
+  extends:
+    - .tags_only
+    - .sign
+  needs:
+    - job: build
