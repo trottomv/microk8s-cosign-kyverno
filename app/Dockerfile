@@ -2,7 +2,7 @@
 
 FROM python:3.12-slim-bookworm
 
-LABEL project="microk8s-setup" name="helloworld"
+LABEL project="microk8s-cosign-kyverno" name="helloworld"
 ARG DEBIAN_FRONTEND=noninteractive
 ARG USER=appuser
 ENV APPUSER=$USER LANG=C.UTF-8 LC_ALL=C.UTF-8 PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 WORKDIR=/app
