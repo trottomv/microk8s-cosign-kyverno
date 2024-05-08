@@ -51,6 +51,13 @@ setup_kyverno:  ## Setting up Kyverno on K8s cluster
 	terraform -chdir=./terraform/k8s/kyverno-policies/ plan -var-file=../vars/k8s.tfvars -var-file=../vars/regcred.tfvars -var-file=../vars/cosign.tfvars
 	terraform -chdir=./terraform/k8s/kyverno-policies/ apply -auto-approve -var-file=../vars/k8s.tfvars -var-file=../vars/regcred.tfvars -var-file=../vars/cosign.tfvars
 
+.PHONY: setup_vault
+setup_vault:  ## Setting up Hashicopr Vault on K8s cluster
+	terraform -chdir=./terraform/k8s/vault/ init
+	terraform -chdir=./terraform/k8s/vault/ validate
+	terraform -chdir=./terraform/k8s/vault/ plan -var-file=../vars/k8s.tfvars
+	terraform -chdir=./terraform/k8s/vault/ apply -auto-approve -var-file=../vars/k8s.tfvars
+
 .PHONY: setup_kubernetes
 setup_kubernetes:  ## Setting up MicroK8s cluster on server
 	ansible-playbook -i ./ansible/inventories/hosts ./ansible/playbooks/install_microk8s.yaml
