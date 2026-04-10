@@ -143,7 +143,7 @@ service_container_image = "registry.gitlab.com/<path-to-your-gitlab-project>/app
 2. Input the `cosign_public_key` stored in GitLab CI CD variables in `terraform/k8s/vars/cosign.tfvars`
 ```
 e.g.
-cosign_public_key = "m2sOg6939F244zoN7QMKrPUFobpBuDePdiWzKbYUDUMqSrAiOBcpEIFa9h9lGEAt6UlbX5NvTRYpdXoBCI08S8X3ttyRSgQCWVLzY7aDiGrjYh3NJBbVvXKYD7/bKBtIbVkYq3LCgS6wTFE4DhxnQUXgySOY=="
+cosign_public_key = "<your-cosign-public-key>"
 ```
 
 3. Deploy MicroK8s resources
