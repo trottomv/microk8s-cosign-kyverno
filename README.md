@@ -136,13 +136,11 @@ Otherwise, you will receive an error during deployment.
 
 1. Input the `service_container_image` in `terraform/k8s/vars/deployment.tfvars`
 ```
-e.g.
 service_container_image = "registry.gitlab.com/<path-to-your-gitlab-project>/app:v.1.0.0"
 ```
 
 2. Input the `cosign_public_key` stored in GitLab CI CD variables in `terraform/k8s/vars/cosign.tfvars`
 ```
-e.g.
 cosign_public_key = "<your-cosign-public-key>"
 ```
 
